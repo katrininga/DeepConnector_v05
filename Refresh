@@ -1,0 +1,68 @@
+#Collects all Deepreads and creates boolean knobs with filenames
+
+node = nuke.thisNode()
+knobs = node.knobs()
+user_knob_index = 35
+user_knob = node.knob(user_knob_index)
+user_knobs = node.allKnobs()[(user_knob_index + 1):]
+read_nodes = nuke.allNodes("DeepRead")
+file_list = []
+knob_list = []
+new_file_list = []
+
+#gathers file paths in all DeepRead
+for read in read_nodes:
+    read_file = nuke.filename(read)
+    file_list.append(read_file)
+
+#removes everything from filepath except file name and puts in a list
+
+for filename in file_list:
+    name = filename.split("/")[-1]
+    if name not in new_file_list:
+        knob_list.append(name)
+knob_list = sorted(knob_list)
+
+
+#Removes all knobs, before creating new ones from updated file list
+def RemoveKnobs():
+    removing_list = []
+    for i in user_knobs:
+        for k in knob_list:
+            if i.name() != k:
+                if i.name() not in removing_list:
+                    removing_list.append(i.name())
+    return removing_list
+
+
+for x in RemoveKnobs():
+    if node.knob(x).Class() == "Boolean_Knob":
+        node.removeKnob(knobs[x])
+
+
+#all knobs on node
+listaroni = [i for i in node.knobs()]
+
+#if there are more than one of the same filename, puts number of occurances in brackets and changes font color to red as a warning
+for i in knob_list:
+    
+    if knob_list.count(i) > 1:
+        knob_count = knob_list.count(i)
+        x = i + "(" + str(knob_count) + ")"
+        this_name = "<font color = 'red'>" + x + "</font>"
+        double_knob = nuke.Boolean_Knob(this_name,this_name,True)
+        
+        #remove knob so same knob isn't created multible times
+        if i in listaroni:
+            node.removeKnob(knobs[i])
+        #creates new boolean knob from filename with warning labels    
+        if this_name not in listaroni:
+            double_knob.setFlag(nuke.STARTLINE)
+            node.addKnob(double_knob)
+        
+    else:
+        #creates new boolean knob from filename
+        if i not in listaroni:
+            knobster = nuke.Boolean_knob(i,i,True)
+            knobster.setFlag(nuke.STARTLINE)
+            node.addKnob(knobster)
