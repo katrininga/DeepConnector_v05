@@ -1,0 +1,64 @@
+#Connects to selected boolean knobs on DeepCollector tool and connects to either Reformats under DeepRead node or straight to DeepRead assosiated with the knob. Selection on Pulldown choice decides if to connect to DeepRead or Reformat.
+node = nuke.thisNode()
+knobs = node.knobs()
+user_knob_index = 35
+user_knob = node.knob(user_knob_index)
+user_knobs = node.allKnobs()[(user_knob_index + 1):]
+reformat_nodes = nuke.allNodes("DeepReformat")
+read_nodes = nuke.allNodes("DeepRead")
+
+#disables all inputs
+disableInput = 0
+
+for i,k in enumerate(knobs):
+    node.setInput(disableInput,None)
+    disableInput += 1
+
+#finds selected boolean knobs and alters cleans up name before adding to list
+
+active_knobs = []
+for i in user_knobs:
+        if node[i.name()].getValue() == 1 and i.Class() == "Boolean_Knob":
+            if i.name().find("<font color = 'red'>") != -1:
+                newname = i.name().replace("<font color = 'red'>", "").split("(")[0]
+                activate_knobs.append(newname)
+
+            else:
+                activate_knobs.append(i.name())
+
+#filters out deepread copies
+filtered_reads = []
+selected_deep_reads = []
+
+def compare(read_list,check_reads):
+    file_paths = [read.knob('file').evaluate() for read in read_list]
+    if check_reads['file'].evaluate() not in file_paths:
+        read_list.append(check_reads)
+
+#finds selected bool knobs for deepreads
+for a in read_nodes:
+    file = a.knob("file").getValue()
+    for b in active_knobs:
+        if file.find(b) != -1:
+            selected_deep_reads.append(a)
+print selected_deep_reads
+
+selected_deep_reads = set(selected_deep_reads)
+
+#if "Connect to:" drop down button is set to "Reformat", it sends a warning message if DeepRead isn't connected to a Reformat node
+if node["ConnectTo"].value() == "Reformat":
+    for i in set(selected_deep_reads):
+        if i.dependent() == []:
+            nuke.message(i.knob("name").getValue() + " is not connected to a Reformat")
+        file = i["file"].value()
+
+        for x in i.dependent():
+            if x["name"].value.find("Reformat") != -1:
+                compare(filtered_reads, i)
+
+            else:
+                nuke.message(i.knob("name").getValue() + " is not connected to a Reformat")
+
+else:
+    for read in selected_deep_reads:
+        compare(filtered_reads,read)
