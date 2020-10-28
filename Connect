@@ -14,7 +14,7 @@ for i,k in enumerate(knobs):
     node.setInput(disableInput,None)
     disableInput += 1
 
-#finds selected boolean knobs and alters cleans up name before adding to list
+#finds checked/selected checkbox(Boolean) knobs and alters cleans up name before adding to list
 
 active_knobs = []
 for i in user_knobs:
@@ -34,31 +34,62 @@ def compare(read_list,check_reads):
     file_paths = [read.knob('file').evaluate() for read in read_list]
     if check_reads['file'].evaluate() not in file_paths:
         read_list.append(check_reads)
-
+        
+        
 #finds selected bool knobs for deepreads
 for a in read_nodes:
     file = a.knob("file").getValue()
     for b in active_knobs:
         if file.find(b) != -1:
             selected_deep_reads.append(a)
-print selected_deep_reads
 
 selected_deep_reads = set(selected_deep_reads)
+no_reformat[]
+
 
 #if "Connect to:" drop down button is set to "Reformat", it sends a warning message if DeepRead isn't connected to a Reformat node
 if node["ConnectTo"].value() == "Reformat":
-    for i in set(selected_deep_reads):
+    for i in selected_deep_reads:   
         if i.dependent() == []:
-            nuke.message(i.knob("name").getValue() + " is not connected to a Reformat")
-        file = i["file"].value()
-
+            no_reformat.append(i.knob("name").getValue())
+            
+        file = i['file'].value()
+        
         for x in i.dependent():
             if x["name"].value.find("Reformat") != -1:
-                compare(filtered_reads, i)
-
+                compare(filtered_reads, i):
             else:
-                nuke.message(i.knob("name").getValue() + " is not connected to a Reformat")
+                no_reformat.append(i.knob("name").getValue())
 
 else:
     for read in selected_deep_reads:
         compare(filtered_reads,read)
+        
+connect_list = []
+
+for read in filtered_reads:
+    if node.knob("ConnectTo").value() == "Reformat":
+        if read.dependent() == []:
+            no_reformat.append(read.knob("name").getValue())
+          
+        else:
+            for i in read.dependent():
+                if i["name"].value().find("Reformat") != -1:
+                    connect_list.append(i)
+                
+     else:
+        connect_list = filtered_reads
+        
+ if len(no_reformat) > 0:
+    nuke.message(str(no_reformat) + " is not connected to a Reformat")
+    
+ contactor = 0
+ 
+ for i in connect_list:
+    try:
+        node.setInput(contactor, i)
+        contactor += 1
+        
+    except:
+        pass
+               
