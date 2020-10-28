@@ -24,14 +24,70 @@ for filename in file_list:
 knob_list = sorted(knob_list)
 
 
+#Connects to selected boolean knobs on DeepCollector tool and connects to either Reformats under DeepRead node or straight to DeepRead assosiated with the knob. Selection on Pulldown choice decides if to connect to DeepRead or Reformat.
+node = nuke.thisNode()
+knobs = node.knobs()
+user_knob_index = 35
+user_knob = node.knob(user_knob_index)
+user_knobs = node.allKnobs()[(user_knob_index + 1):]
+read_nodes = nuke.allNodes("DeepRead")
+filelist = []
+knoblist = []
+new_file_list = []
+aldready_existing_knobs = []
+
+
+
+
+#finds DeepReads filapths, cuts off everything except file name and adds to knob list
+for i in read_nodes:
+    read_file = nuke.filename(i)
+    file_list.append(read_file)
+    
+    
+    
+for filename in file_list:
+    name = filename.split("/")[-1]
+    
+    if name not in new_file_list:
+        knob_list.append(name)
+                
+knob_list = sorted(knob_list, )
+
+
+
+for x in user_knobs:
+    if x.name().find("<font color = 'green') != -1:
+        newname = x.name(split)("<font color = 'green'>")[-1]
+        newname = newname.split("</fond">)[0]
+        aldready_existing_knobs.append(newname)
+    
+    elif x.name().find("<font color = 'red'>") != -1:
+        newname = x.name().split("<font color = 'red'>") != -1:
+        withnumber = newname.split("(")[-1]
+        newname = newname.split("(" + withnumber)[0]
+        already_existing_knobs.append(newname)
+          
+    else:
+        already_existing_knobs.append(x.name())
+
+
+green_knobs = []
+for x in knob_list:
+    if x not in already_existing_knobs:
+        green_knobs.append(x)
+
+
 #Removes all knobs, before creating new ones from updated file list
 def RemoveKnobs():
     removing_list = []
+    
     for i in user_knobs:
         for k in knob_list:
             if i.name() != k:
                 if i.name() not in removing_list:
                     removing_list.append(i.name())
+                    
     return removing_list
 
 
