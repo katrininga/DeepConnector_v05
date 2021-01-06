@@ -1,30 +1,5 @@
-#Collects all Deepreads and creates boolean knobs with filenames
-
-node = nuke.thisNode()
-knobs = node.knobs()
-user_knob_index = 35
-user_knob = node.knob(user_knob_index)
-user_knobs = node.allKnobs()[(user_knob_index + 1):]
-read_nodes = nuke.allNodes("DeepRead")
-file_list = []
-knob_list = []
-new_file_list = []
-
-#gathers file paths in all DeepRead
-for read in read_nodes:
-    read_file = nuke.filename(read)
-    file_list.append(read_file)
-
-#removes everything from filepath except file name and puts in a list
-
-for filename in file_list:
-    name = filename.split("/")[-1]
-    if name not in new_file_list:
-        knob_list.append(name)
-knob_list = sorted(knob_list)
-
-
 #Connects to selected boolean knobs on DeepCollector tool and connects to either Reformats under DeepRead node or straight to DeepRead assosiated with the knob. Selection on Pulldown choice decides if to connect to DeepRead or Reformat.
+
 node = nuke.thisNode()
 knobs = node.knobs()
 user_knob_index = 35
